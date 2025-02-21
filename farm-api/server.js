@@ -44,6 +44,10 @@ app.post("/tasks", async (req, res) => {
   }
 });
 
+// create new worker
+
+
+
 // get tasks os specific field
 app.get("/fields/:id/tasks", async (req, res) => {
   const { id } = req.params;
