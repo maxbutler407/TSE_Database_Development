@@ -1,6 +1,4 @@
-const app = express();
-
-// changed type to "modeule" in package.json, so using import instead of require()
+// changed type to "modeule" in package.json, so we need to use "import" instead of require()
 import express from "express";
 import cors from "cors";
 import db from "./db.js";
@@ -13,7 +11,7 @@ app.get("/", (req, res) => {
 });
 
 // *** Front-end Development ***
-const { greet } = require("./index.js");
+import { greet } from "./index.js"; // Use import instead of require
 
 app.get("/users", (req, res) => {
   try {
