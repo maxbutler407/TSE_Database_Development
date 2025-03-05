@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 // *** Front-end Development ***
 import { greet } from "./index.js"; // Use import instead of require
 
-app.get("/users", (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     console.log(greet("Max"));
     res.json({ message: greet("Max") });
