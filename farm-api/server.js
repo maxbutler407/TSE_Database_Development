@@ -10,6 +10,11 @@ app.get("/", (req, res) => {
   res.send("Farm Management API is running...");
 });
 
+// *** Front-end Development ***
+import { greet } from `/index.js`; // imports the index.js file's greet function 
+console.log(greet(`User`)); // calls the greet function with `User` as an argument
+
+// *** Database Development***
 // get all Fields
 app.get("/fields", async (req, res) => {
   try {
