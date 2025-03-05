@@ -11,8 +11,15 @@ app.get("/", (req, res) => {
 });
 
 // *** Front-end Development ***
-import { greet } from `/index.js`; // imports the index.js file's greet function 
-console.log(greet(`User`)); // calls the greet function with `User` as an argument
+// displays the users name
+app.get("/users", async (req, res) => {
+  try {
+    import { greet } from `/index.js`; // imports the index.js file's greet function 
+    console.log(greet(`Max`)); // calls the greet function with `User` as an argument
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // *** Database Development***
 // get all Fields
