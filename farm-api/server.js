@@ -1,8 +1,10 @@
-const express = require("express");
-const cors = require("cors");
-const db = require("./db");
-
 const app = express();
+
+// changed type to "modeule" in package.json, so using import instead of require()
+import express from "express";
+import cors from "cors";
+import db from "./db.js";
+
 app.use(cors());
 app.use(express.json());
 
