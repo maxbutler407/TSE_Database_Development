@@ -25,6 +25,13 @@ app.get("/users", (req, res) => {
   }
 });
 
+const PORT = process.env.PORT || 3000;  // Fallback to 3000 if no dynamic port is provided
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+
+
 // *** Database Development***
 // get all Fields
 app.get("/fields", async (req, res) => {
