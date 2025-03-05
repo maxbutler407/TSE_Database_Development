@@ -11,12 +11,14 @@ app.get("/", (req, res) => {
 });
 
 // *** Front-end Development ***
-// displays the users name
-app.get("/users", async (req, res) => {
+const { greet } = require("./index.js");
+
+app.get("/users", (req, res) => {
   try {
-    import { greet } from `/index.js`; // imports the index.js file's greet function 
-    console.log(greet(`Max`)); // calls the greet function with `User` as an argument
+    console.log(greet("Max"));
+    res.json({ message: greet("Max") });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
