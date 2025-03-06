@@ -37,9 +37,8 @@ app.listen(PORT, () => {
 app.get("/fields", async (req, res) => {
   try {
     const [rows] = await db.query("SELECT * FROM Fields");
-    res.json(rows);
-    console.log(greet("Max"));
-    res.json({ message: greet("Max") });
+    console.log(greet("Max")); // This will still print in the console
+    res.json({ fields: rows, message: greet("Max") }); // Nothing after this line will show up on the page
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
