@@ -38,6 +38,8 @@ app.get("/fields", async (req, res) => {
   try {
     const [rows] = await db.query("SELECT * FROM Fields");
     res.json(rows);
+    console.log(greet("Max"));
+    res.json({ message: greet("Max") });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
