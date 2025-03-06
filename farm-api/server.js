@@ -64,16 +64,7 @@ app.post("/tasks", async (req, res) => {
 
 
 
-// get tasks os specific field
-app.get("/fields/:id/tasks", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const [tasks] = await db.query("SELECT * FROM Tasks WHERE Field_ID = ?", [id]);
-    res.json(tasks);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+
 
 // assign worker to the task
 app.post("/assign-task", async (req, res) => {
