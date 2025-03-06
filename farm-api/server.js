@@ -34,7 +34,14 @@ app.listen(PORT, () => {
 
 // *** Database Development***
 // get all Fields
-
+app.get("/fields", async (req, res) => {
+  try {
+    const [fields] = await db.query("SELECT * FROM Fields");
+    res.json(fields);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // get all tasks
 app.get("/tasks", async (req, res) => {
@@ -61,10 +68,16 @@ app.post("/tasks", async (req, res) => {
 });
 
 // create new worker
-
-
-
-
+// get tasks os specific field
+app.get("/fields/:id/tasks", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [tasks] = await db.query("SELECT * FROM Tasks WHERE Field_ID = ?", [id]);
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // assign worker to the task
 app.post("/assign-task", async (req, res) => {
