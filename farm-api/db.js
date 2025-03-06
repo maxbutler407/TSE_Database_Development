@@ -21,3 +21,6 @@ const connection = mysql.createConnection({
 });
 
 export default connection;
+
+import dotenv from 'dotenv';
+dotenv.config();
