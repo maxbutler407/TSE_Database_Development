@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
 });
 
 // *** Front-end Development ***
-import greet from "./index.js"; // Use import instead of require
+import { greet } from "./index.js"; // Use import instead of require
 
 app.get("/users", async (req, res) => {
   try {
