@@ -66,6 +66,17 @@ app.post("/assign-task", async (req, res) => {
   }
 });
 
+app.get("/test-db", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT 1");
+    res.json({ status: "success", result: rows });
+  } catch (err) {
+    console.error("TEST DB ERROR:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // start server
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
