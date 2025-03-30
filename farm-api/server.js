@@ -66,6 +66,16 @@ app.post("/assign-task", async (req, res) => {
   }
 });
 
+// get all accounts
+app.get("/accounts", async (req, res) => {
+  try {
+    const [accounts] = await db.query("SELECT * FROM accounts");
+    res.json(accounts);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/test-db", async (req, res) => {
   try {
     const [rows] = await db.query("SELECT 1");
