@@ -1,7 +1,7 @@
 // changed type to "modeule" in package.json, so we need to use "import" instead of require()
 import express from "express";
 import cors from "cors";
-import db from "./db.js";
+import { db } from "./db.js";
 
 const app = express();  // Now define 'app' after imports
 
