@@ -55,6 +55,9 @@ app.get("/tasks", async (req, res) => {
 
 // create new task
 app.post("/tasks", async (req, res) => {
+
+  console.log("Received POST request at /tasks with body:", req.body); // Debug log
+  
   const { Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time } = req.body;
 
     // check if account_id is provided for debugging
