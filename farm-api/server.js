@@ -56,6 +56,11 @@ app.get("/tasks", async (req, res) => {
 // create new task
 app.post("/tasks", async (req, res) => {
   const { Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time } = req.body;
+
+    // check if account_id is provided for debugging
+  if (!account_id) {
+    return res.status(400).json({ error: "account_id is required" });
+    
   try {
     const [result] = await db.query(
       "INSERT INTO Tasks (Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time) VALUES (?, ?, ?, ?, ?)",
