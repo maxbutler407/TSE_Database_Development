@@ -41,7 +41,7 @@ app.post("/tasks", async (req, res) => {
 
   console.log("Received POST request at /tasks with body:", req.body); // Debug log
   
-  const { Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time } = req.body;
+  const { Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time, account_id } = req.body;
 
   // Check if account_id is provided
   if (!account_id) {
