@@ -90,7 +90,7 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- Table `FarmManagement`.`Tasks`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `FarmManagement`.`Tasks` (
-  `Task_ID` INT NOT NULL AUTO_INCREMENT,
+  `Task_ID` INT NOT NULL,
   `Task_name` VARCHAR(100) NOT NULL,
   `Field_ID` INT NULL DEFAULT NULL,
   `Required_Skills` VARCHAR(255) NULL DEFAULT NULL,
