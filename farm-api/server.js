@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
   res.send("Farm Management API is running...");
 });
 
-// *** Front-end Development ***
+/* *** Front-end Development ***
 import { greet } from "./index.js"; // Use import instead of require
 
 app.get("/users", async (req, res) => {
@@ -29,6 +29,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+*/
 
 
 
