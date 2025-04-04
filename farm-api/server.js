@@ -86,6 +86,19 @@ app.post("/assign-task", async (req, res) => {
   }
 });
 
+// Clear the Tasks table on every server restart
+async function clearTasksTable() {
+  try {
+    await db.query("DELETE FROM Tasks");
+    console.log("✅ Tasks table cleared on deployment.");
+  } catch (err) {
+    console.error("❌ Failed to clear Tasks table:", err.message);
+  }
+}
+
+// clears the data in the tasks table every time we commit changes
+clearTasksTable();
+
 // start server
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
