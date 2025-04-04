@@ -42,6 +42,12 @@ app.post("/tasks", async (req, res) => {
   console.log("Received POST request at /tasks with body:", req.body); // Debug log
   
   const { Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time } = req.body;
+
+  // Check if account_id is provided
+  if (!account_id) {
+    console.error("Error: account_id is missing");
+    return res.status(400).json({ error: "account_id is required" });
+  }
     
   try {
     const [result] = await db.query(
