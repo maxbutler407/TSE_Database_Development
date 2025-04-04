@@ -43,7 +43,7 @@ app.post("/tasks", async (req, res) => {
   
   const { Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time, account_id } = req.body;
 
-  // Check if account_id is provided
+  // Check if required info is provided from Wix
   if (!account_id) {
     console.error("Error: account_id is missing");
     return res.status(400).json({ error: "account_id is required" });
@@ -54,7 +54,8 @@ app.post("/tasks", async (req, res) => {
       "INSERT INTO Tasks (Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time, account_id) VALUES (?, ?, ?, ?, ?, ?)",
       [Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time, account_id]
     );
-    
+
+    // inserts the inputted data from Wix
     res.json({ id: result.insertId, Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time });
   } catch (err) {
     console.error("❌ DB Insert Error:", err.message);
