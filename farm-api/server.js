@@ -12,25 +12,6 @@ app.get("/", (req, res) => {
   res.send("Farm Management API is running...");
 });
 
-/* *** Front-end Development ***
-import { greet } from "./index.js"; // Use import instead of require
-
-app.get("/users", async (req, res) => {
-  try {
-    console.log(greet("Max"));
-    res.json({ message: greet("Max") });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-*/
-
 
 
 // *** Database Development***
@@ -46,6 +27,7 @@ app.get("/fields", async (req, res) => {
 
 // get all tasks
 app.get("/tasks", async (req, res) => {
+  
   try {
     const [tasks] = await db.query("SELECT * FROM Tasks");
     res.json(tasks);
@@ -56,6 +38,8 @@ app.get("/tasks", async (req, res) => {
 
 // create new task
 app.post("/tasks", async (req, res) => {
+
+  console.log("Received POST request at /tasks with body:", req.body); // Debug log
   
   const { Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time } = req.body;
     
