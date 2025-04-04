@@ -39,7 +39,7 @@ app.get("/tasks", async (req, res) => {
 // create new task
 app.post("/tasks", async (req, res) => {
 
-  console.log("Received POST request at /tasks with body:", req.body); // Debug log
+  console.log("💬 Incoming data:", req.body); // NEW LOGGING LINE
   
   const { Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time, account_id } = req.body;
 
@@ -51,11 +51,13 @@ app.post("/tasks", async (req, res) => {
     
   try {
     const [result] = await db.query(
-      "INSERT INTO Tasks (Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time) VALUES (?, ?, ?, ?, ?)",
-      [Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time]
+      "INSERT INTO Tasks (Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time, account_id) VALUES (?, ?, ?, ?, ?, ?)",
+      [Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time, account_id]
     );
+    
     res.json({ id: result.insertId, Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time });
   } catch (err) {
+    console.error("❌ DB Insert Error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
