@@ -52,7 +52,7 @@ app.post("/tasks", async (req, res) => {
   try {
     const [result] = await db.query(
       "INSERT INTO Tasks (Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time, account_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [Task_name, Field_ID, Required_Skills, Num_of_workers, Task_Time, account_id]
+      [Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time, account_id]
     );
 
     // inserts the inputted data from Wix
