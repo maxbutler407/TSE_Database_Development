@@ -41,18 +41,18 @@ app.post("/tasks", async (req, res) => {
 
   console.log("💬 Incoming data:", req.body); // NEW LOGGING LINE
   
-  const { Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time, account_id } = req.body;
+  const { Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time } = req.body;
 
   // Check if required info is provided from Wix
-  if (!account_id) {
-    console.error("Error: account_id is missing");
-    return res.status(400).json({ error: "account_id is required" });
-  }
+  //if (!account_id) {
+  //  console.error("Error: account_id is missing");
+  //  return res.status(400).json({ error: "account_id is required" });
+  //}
     
   try {
     const [result] = await db.query(
-      "INSERT INTO Tasks (Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time, account_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time, account_id]
+      "INSERT INTO Tasks (Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time) VALUES (?, ?, ?, ?, ?, ?)",
+      [Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time]
     );
 
     // inserts the inputted data from Wix
