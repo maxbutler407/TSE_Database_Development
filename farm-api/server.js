@@ -57,7 +57,7 @@ app.post("/tasks", async (req, res) => {
     
   try {
     const [result] = await db.query(
-      "INSERT INTO Tasks (account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO Tasks (account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_Type, Task_Time) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time]
     );
 
