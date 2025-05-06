@@ -61,7 +61,7 @@ app.post("/tasks", async (req, res) => {
       [account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time]
     );
 
-    //console.log("✅ DB Insert Result:", result); // ✅ After insert
+    console.log("✅ DB Insert Result:", result); // ✅ After insert
 
     // inserts the inputted data from Wix
     res.json({ id: result.insertId, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time });
