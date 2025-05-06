@@ -25,7 +25,7 @@ app.get("/fields", async (req, res) => {
   }
 });
 
-// POST /fields
+// POST /fields to create a new field
 app.post("/fields", async (req, res) => {
   const { name, crop_type, account_id } = req.body;  // Use 'name' instead of 'field_name'
 
@@ -47,8 +47,7 @@ app.post("/fields", async (req, res) => {
   }
 });
 
-
-// Add this in your Express app, e.g., in app.js
+// DELETE /fields/:id to delete a field by its ID
 app.delete("/fields/:id", async (req, res) => {
   const { id } = req.params;
   try {
