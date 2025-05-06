@@ -1,0 +1,182 @@
+import wixData from 'wix-data';
+import wixUsers from 'wix-users';
+
+$w.onReady(async function () {
+  try {
+    // Show inputs when taskButton1 is clicked
+    $w("#taskButton1").onClick(() => {
+      $w("#input1").show();
+      $w("#input2").show();
+      $w("#input3").show();
+      $w("#input4").show();
+      $w("#input5").show();
+      $w("#input6").show();
+      $w("#input7").show();
+      $w("#input8").show();
+      $w("#taskButton2").show();
+    });
+
+    // Submit task to backend
+    $w("#taskButton2").onClick(async () => {
+      let taskName = $w("#input1").value;
+      let taskID = $w("#input2").value;
+      let fieldID = $w("#input3").value;
+      let requiredSkills = $w("#input4").value;
+      let noOfWorkers = $w("#input5").value;
+      let workerType = $w("#input6").value;
+      let taskDuration = $w("#input7").value;
+      let accountID = $w("#input8").value;
+
+      if (!taskName) {
+        $w("#debugger1").text = "❌ Please enter a task name!";
+        return;
+      }
+
+      try {
+        const response = await fetch("https://api-production-1560.up.railway.app/tasks/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            Task_name: taskName,
+            Field_ID: fieldID,
+            Required_Skills: requiredSkills,
+            Num_of_workers: noOfWorkers,
+            Worker_Type: workerType,
+            Task_Time: taskDuration,
+            account_id: accountID
+          })
+        });
+
+        if (response.ok) {
+          $w("#debugger1").text = "✅ Added all inputted values to the database!";
+          await loadTasks();
+        } else {
+          const errorDetails = await response.text();
+          $w("#debugger1").text = `❌ Failed to add task. Server error: ${response.status}`;
+          console.error("Error details:", errorDetails);
+        }
+      } catch (error) {
+        $w("#debugger1").text = "❌ Error connecting to database!";
+        console.error("Database Error:", error);
+      }
+    });
+
+    // Initial task loading
+    await loadTasks();
+
+  } catch (error) {
+    console.error("Fetch Error:", error);
+  }
+});
+
+
+// Function to fetch tasks and update table
+async function loadTasks() {
+  try {
+    // Fetch tasks from your API
+    const response = await fetch("https://api-production-1560.up.railway.app/tasks/");
+    
+    if (response.ok) {
+      const data = await response.json();
+
+      if (!Array.isArray(data)) {
+        console.error("Expected an array from API, got:", data);
+        return;
+      }
+
+      const formattedDataForTasksTable = data.map(task => ({
+        Task_ID: task.Task_ID,
+        Task_name: task.Task_name,
+        Field_ID: task.Field_ID,
+        Required_Skills: task.Required_Skills,
+        Num_of_workers: task.Num_of_workers,
+        Worker_type: task.Worker_Type,
+        Task_Time: task.Task_Time,
+        account_id: task.account_id
+      }));
+
+      const formattedDataForprogressTable = data.map(task => ({
+        Incomplete: task.Task_name,
+        InProgress: "",
+        Complete: ""
+      }));
+
+      console.log("Formatted Data for tasks table:", formattedDataForTasksTable);
+      $w("#tasksTable").rows = formattedDataForTasksTable; // ✅ Set rows inside the block
+
+      console.log("Formatted Data for progress table:", formattedDataForprogressTable);      
+      $w("#taskProgressTable").rows = formattedDataForprogressTable;
+
+    } else {
+      console.error("API Error:", response.status);
+    }
+  } catch (error) {
+    console.error("Fetch Error:", error);
+  }
+}
+
+
+
+
+let locations = []; // Store all saved locations (polygons)
+let fieldCounter = 1; // Unique field counter for field IDs
+
+$w.onReady(function () {
+    // When the user clicks the "Save Location" button (after drawing the polygon)
+    $w("#btnSaveLocation").onClick(() => {
+        let fieldID = `Field ${fieldCounter}`;  // Create a unique field ID
+        let cropType = $w("#cropTypeInput").value.trim();
+
+        if (!cropType) {
+            console.error("Please enter a Crop Type.");
+            return;
+        }
+
+        // Ensure a valid polygon exists before saving
+        if (locations.length > 0) {
+            let locationData = locations[locations.length - 1];  // Get the most recent location data
+
+            // Add the new field details
+            locationData.fieldID = fieldID;
+            locationData.cropType = cropType;
+
+            // Save the current field
+            console.log("Saved Location:", locationData);
+
+            // Send updated locations to the embedded "View Map"
+            $w("#htmlViewMap").postMessage(JSON.stringify(locations));
+
+            fieldCounter++;  // Increment field ID for the next location
+        } else {
+            console.error("No location to save.");
+        }
+    });
+
+    // Show the saved fields (polygons) on the "View Map"
+    $w("#btnShowMap").onClick(() => {
+        if (locations.length === 0) {
+            console.error("No locations saved yet.");
+            return;
+        }
+
+        // Send the saved locations to the embedded map for display
+        $w("#htmlViewMap").postMessage(JSON.stringify(locations));
+    });
+
+    // Listen for the message from the "Create Map" with the new polygon
+    $w("#htmlCreateMap").onMessage((event) => {
+        let incomingLocations = JSON.parse(event.data);
+
+        if (Array.isArray(incomingLocations) && incomingLocations.length > 0) {
+            // Add the incoming location data to the locations array (without overwriting existing data)
+            incomingLocations.forEach(location => {
+                locations.push(location);  // Add the new location to the array
+            });
+
+            // Log or display the new location data
+            console.log("Updated Locations:", locations);
+        }
+    });
+});
