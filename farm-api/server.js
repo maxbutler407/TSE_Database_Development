@@ -30,7 +30,7 @@ app.get("/tasks", async (req, res) => {
   
   try {
     const [tasks] = await db.query("SELECT * FROM Tasks");
-    //console.log("📥 Loaded tasks from DB:", tasks); // ✅ Log tasks returned
+    console.log("📥 Loaded tasks from DB:", tasks); // ✅ Log tasks returned
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ error: err.message });
