@@ -110,15 +110,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-  // 3. Success!
-  res.json({
-    success: true,
-    account_id: account.account_id,
-    account_type: account.account_type
-  });
-});
-
-
 // Clear the Tasks table on every server restart
 async function clearTasksTable() {
   try {
