@@ -30,6 +30,7 @@ app.get("/tasks", async (req, res) => {
   
   try {
     const [tasks] = await db.query("SELECT * FROM Tasks");
+    console.log("📥 Loaded tasks from DB:", tasks); // ✅ Log tasks returned
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -40,8 +41,13 @@ app.get("/tasks", async (req, res) => {
 app.post("/tasks", async (req, res) => {
 
   console.log("💬 Incoming data:", req.body); // NEW LOGGING LINE
+  console.log("👷 Worker_Type received:", req.body.Worker_Type); // ✅ Add this
   
   const { account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time } = req.body;
+
+  console.log("📝 Inserting into DB:", [
+    Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_Type, Task_Time, account_id
+  ]);
 
   // Check if required info is provided from Wix
   //if (!account_id) {
@@ -54,6 +60,8 @@ app.post("/tasks", async (req, res) => {
       "INSERT INTO Tasks (account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time]
     );
+
+    console.log("✅ DB Insert Result:", result); // ✅ After insert
 
     // inserts the inputted data from Wix
     res.json({ id: result.insertId, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time });
