@@ -25,28 +25,25 @@ app.get("/fields", async (req, res) => {
   }
 });
 
+// POST /fields
 app.post("/fields", async (req, res) => {
-  const { field_name, crop_type, account_id } = req.body;
+  const { name, crop_type, account_id } = req.body;  // Use 'name' instead of 'field_name'
 
-  // Log incoming data for debugging
-  console.log("📥 Incoming field data:", req.body);
-
-  if (!field_name || !account_id) {
+  if (!name || !account_id) {
     return res.status(400).json({ error: "Missing required field info" });
   }
 
   try {
     const [result] = await db.query(
-      "INSERT INTO Fields (field_name, crop_type, account_id) VALUES (?, ?, ?)",
-      [field_name, crop_type || null, account_id]
+      "INSERT INTO Fields (name, crop_type, account_id) VALUES (?, ?, ?)",  // Use 'name' here
+      [name, crop_type || null, account_id]
     );
 
-    console.log("✅ New field created:", result.insertId); // Log the insert ID
+    console.log("✅ New field created:", result.insertId);
     res.json({ id: result.insertId });
   } catch (err) {
     console.error("❌ Failed to insert field:", err.message);
-    // Log more detailed error
-    res.status(500).json({ error: `Failed to insert field: ${err.message}` });
+    res.status(500).json({ error: "Failed to insert field" });
   }
 });
 
