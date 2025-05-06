@@ -41,7 +41,7 @@ app.post("/tasks", async (req, res) => {
 
   console.log("💬 Incoming data:", req.body); // NEW LOGGING LINE
   
-  const { Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time } = req.body;
+  const { account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time } = req.body;
 
   // Check if required info is provided from Wix
   //if (!account_id) {
@@ -51,8 +51,8 @@ app.post("/tasks", async (req, res) => {
     
   try {
     const [result] = await db.query(
-      "INSERT INTO Tasks (Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time) VALUES (?, ?, ?, ?, ?, ?)",
-      [Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time]
+      "INSERT INTO Tasks (account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time]
     );
 
     // inserts the inputted data from Wix
