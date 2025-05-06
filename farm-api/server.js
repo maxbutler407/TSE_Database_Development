@@ -1,4 +1,5 @@
 // changed type to "modeule" in package.json, so we need to use "import" instead of require()
+import bcrypt from "bcrypt";
 import express from "express";
 import cors from "cors";
 import { db } from "./db.js";
@@ -85,6 +86,38 @@ app.post("/assign-task", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: "Email and password are required." });
+  }
+
+  try {
+    const [rows] = await db.query("SELECT * FROM accounts WHERE email = ?", [email]);
+
+    if (rows.length === 0) {
+      return res.status(401).json({ success: false, message: "Invalid email or password." });
+    }
+
+    const account = rows[0];
+
+    const isMatch = await bcrypt.compare(password, account.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: "Invalid email or password." });
+    }
+
+    res.json({
+      success: true,
+      account_id: account.account_id,
+      account_type: account.account_type
+    });
+  } catch (err) {
+    console.error("Login error:", err.message);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+});
+
 
 // Clear the Tasks table on every server restart
 async function clearTasksTable() {
