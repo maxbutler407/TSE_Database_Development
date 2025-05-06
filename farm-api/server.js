@@ -1,5 +1,4 @@
 // changed type to "modeule" in package.json, so we need to use "import" instead of require()
-import bcrypt from "bcrypt";
 import express from "express";
 import cors from "cors";
 import { db } from "./db.js";
@@ -89,25 +88,27 @@ app.post("/assign-task", async (req, res) => {
 
 // login
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  // 1. Select password_hash, not password
-  const [rows] = await db.query(
-    "SELECT account_id, account_type, password_hash FROM accounts WHERE email = ?",
-    [email]
-  );
+  try {
+    const [rows] = await db.query("SELECT * FROM accounts WHERE username = ?", [username]);
 
-  if (rows.length === 0) {
-    return res.status(401).json({ success: false, message: "Invalid email or password." });
+    if (rows.length === 0) {
+      return res.status(401).json({ success: false, message: "User not found" });
+    }
+
+    const user = rows[0];
+
+    // Direct comparison (not recommended for production)
+    if (password !== user.password) {
+      return res.status(401).json({ success: false, message: "Invalid password" });
+    }
+
+    res.json({ success: true, account_id: user.account_id, account_type: user.account_type });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-
-  const account = rows[0];
-
-  // 2. Compare plain password to password_hash
-  const isMatch = await bcrypt.compare(password, account.password_hash);
-  if (!isMatch) {
-    return res.status(401).json({ success: false, message: "Invalid email or password." });
-  }
+});
 
   // 3. Success!
   res.json({
