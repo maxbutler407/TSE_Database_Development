@@ -78,9 +78,9 @@ app.get("/tasks", async (req, res) => {
 app.post("/tasks", async (req, res) => {
 
   console.log("💬 Incoming data:", req.body); // NEW LOGGING LINE
-  console.log("👷 Worker_type received:", req.body.Worker_type); // ✅ Add this
+  console.log("👷 Worker_Type received:", req.body.Worker_Type); // ✅ Add this
   
-  const { account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time } = req.body;
+  const { account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_Type, Task_Time } = req.body;
 
   //console.log("📝 Inserting into DB:", [
   //  Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_Type, Task_Time, account_id
@@ -95,13 +95,13 @@ app.post("/tasks", async (req, res) => {
   try {
     const [result] = await db.query(
       "INSERT INTO Tasks (account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_Type, Task_Time) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time]
+      [account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_Type, Task_Time]
     );
 
     console.log("✅ DB Insert Result:", result); // ✅ After insert
 
     // inserts the inputted data from Wix
-    res.json({ id: result.insertId, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time });
+    res.json({ id: result.insertId, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_Type, Task_Time });
   } catch (err) {
     console.error("❌ DB Insert Error:", err.message);
     res.status(500).json({ error: err.message });
