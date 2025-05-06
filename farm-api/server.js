@@ -41,7 +41,7 @@ app.get("/tasks", async (req, res) => {
 app.post("/tasks", async (req, res) => {
 
   console.log("💬 Incoming data:", req.body); // NEW LOGGING LINE
-  console.log("👷 Worker_Type received:", req.body.Worker_Type); // ✅ Add this
+  //console.log("👷 Worker_Type received:", req.body.Worker_Type); // ✅ Add this
   
   const { account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time } = req.body;
 
