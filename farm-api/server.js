@@ -99,7 +99,6 @@ app.post("/login", async (req, res) => {
 
     const user = rows[0];
 
-    // Direct comparison (not recommended for production)
     if (password !== user.password) {
       return res.status(401).json({ success: false, message: "Invalid password" });
     }
