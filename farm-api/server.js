@@ -25,9 +25,11 @@ app.get("/fields", async (req, res) => {
   }
 });
 
-// POST /fields
 app.post("/fields", async (req, res) => {
   const { field_name, crop_type, account_id } = req.body;
+
+  // Log incoming data for debugging
+  console.log("📥 Incoming field data:", req.body);
 
   if (!field_name || !account_id) {
     return res.status(400).json({ error: "Missing required field info" });
@@ -39,13 +41,15 @@ app.post("/fields", async (req, res) => {
       [field_name, crop_type || null, account_id]
     );
 
-    console.log("✅ New field created:", result.insertId);
+    console.log("✅ New field created:", result.insertId); // Log the insert ID
     res.json({ id: result.insertId });
   } catch (err) {
     console.error("❌ Failed to insert field:", err.message);
-    res.status(500).json({ error: "Failed to insert field" });
+    // Log more detailed error
+    res.status(500).json({ error: `Failed to insert field: ${err.message}` });
   }
 });
+
 
 // Add this in your Express app, e.g., in app.js
 app.delete("/fields/:id", async (req, res) => {
