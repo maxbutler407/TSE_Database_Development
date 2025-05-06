@@ -45,9 +45,9 @@ app.post("/tasks", async (req, res) => {
   
   const { account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time } = req.body;
 
-  //console.log("📝 Inserting into DB:", [
-  //  Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_Type, Task_Time, account_id
-  //]);
+  console.log("📝 Inserting into DB:", [
+    Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_Type, Task_Time, account_id
+  ]);
 
   // Check if required info is provided from Wix
   //if (!account_id) {
