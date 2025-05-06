@@ -86,36 +86,35 @@ app.post("/assign-task", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// login
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: "Email and password are required." });
+  // 1. Select password_hash, not password
+  const [rows] = await db.query(
+    "SELECT account_id, account_type, password_hash FROM accounts WHERE email = ?",
+    [email]
+  );
+
+  if (rows.length === 0) {
+    return res.status(401).json({ success: false, message: "Invalid email or password." });
   }
 
-  try {
-    const [rows] = await db.query("SELECT * FROM accounts WHERE email = ?", [email]);
+  const account = rows[0];
 
-    if (rows.length === 0) {
-      return res.status(401).json({ success: false, message: "Invalid email or password." });
-    }
-
-    const account = rows[0];
-
-    const isMatch = await bcrypt.compare(password, account.password_hash);
-    if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid email or password." });
-    }
-
-    res.json({
-      success: true,
-      account_id: account.account_id,
-      account_type: account.account_type
-    });
-  } catch (err) {
-    console.error("Login error:", err.message);
-    res.status(500).json({ success: false, message: "Server error." });
+  // 2. Compare plain password to password_hash
+  const isMatch = await bcrypt.compare(password, account.password_hash);
+  if (!isMatch) {
+    return res.status(401).json({ success: false, message: "Invalid email or password." });
   }
+
+  // 3. Success!
+  res.json({
+    success: true,
+    account_id: account.account_id,
+    account_type: account.account_type
+  });
 });
 
 
