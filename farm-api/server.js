@@ -88,13 +88,14 @@ app.post("/assign-task", async (req, res) => {
 
 // login
 app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;  // Use email instead of username
 
   try {
-    const [rows] = await db.query("SELECT * FROM accounts WHERE username = ?", [username]);
+    // Update the query to search for the email field in the database
+    const [rows] = await db.query("SELECT * FROM accounts WHERE email = ?", [email]);
 
     if (rows.length === 0) {
-      return res.status(401).json({ success: false, message: "User not found" });
+      return res.status(401).json({ success: false, message: "This email doesn't match any account. Try again." });
     }
 
     const user = rows[0];
