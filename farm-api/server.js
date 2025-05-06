@@ -25,6 +25,43 @@ app.get("/fields", async (req, res) => {
   }
 });
 
+// POST /fields
+app.post("/fields", async (req, res) => {
+  const { field_name, crop_type, account_id } = req.body;
+
+  if (!field_name || !account_id) {
+    return res.status(400).json({ error: "Missing required field info" });
+  }
+
+  try {
+    const [result] = await db.query(
+      "INSERT INTO Fields (field_name, crop_type, account_id) VALUES (?, ?, ?)",
+      [field_name, crop_type || null, account_id]
+    );
+
+    console.log("✅ New field created:", result.insertId);
+    res.json({ id: result.insertId });
+  } catch (err) {
+    console.error("❌ Failed to insert field:", err.message);
+    res.status(500).json({ error: "Failed to insert field" });
+  }
+});
+
+// Add this in your Express app, e.g., in app.js
+app.delete("/fields/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await db.query("DELETE FROM Fields WHERE id = ?", [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Field not found" });
+    }
+    res.json({ message: "Field deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // get all tasks
 app.get("/tasks", async (req, res) => {
   
