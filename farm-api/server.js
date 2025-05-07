@@ -137,6 +137,18 @@ app.patch("/tasks/:id", async (req, res) => {
   }
 });
 
+// Clear all tasks from the Tasks table
+app.delete("/tasks", async (req, res) => {
+  try {
+    await db.query("DELETE FROM Tasks");
+    await db.query("ALTER TABLE Tasks AUTO_INCREMENT = 1");
+    console.log("✅ Tasks table cleared via API.");
+    res.status(200).json({ message: "Tasks table cleared." });
+  } catch (err) {
+    console.error("❌ Failed to clear Tasks table:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // create new worker
 // get tasks os specific field
