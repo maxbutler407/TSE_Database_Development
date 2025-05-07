@@ -13,4 +13,14 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+// Test MySQL connection to ensure the values are correct
+pool.getConnection()
+  .then(conn => {
+    console.log("✅ MySQL connected");
+    conn.release();
+  })
+  .catch(err => {
+    console.error("❌ MySQL connection error:", err.message);
+  });
+
 export const db = pool.promise();
