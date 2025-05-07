@@ -1,6 +1,6 @@
 ### The following information describes each file used for our farm project:
 
-farm-api >> db.js is the SQL database code.
+SQL SCRIPT FOR TABLES is the SQL database code.
 
 farm-api >> server.js is the back-end code (eg. describes endpoints to transmit data from the front-end to the database)
 
