@@ -74,82 +74,75 @@ app.delete("/fields/:id", async (req, res) => {
 
 
 
-// Get all tasks with optional filtering by status
+// GET all tasks (with optional filtering by status)
 app.get("/tasks", async (req, res) => {
-  const { status } = req.query;  // Extracting 'status' from query params, if available
+  const { status } = req.query;  // extracts 'status' from query params if patched
 
   try {
-    // Build the query conditionally based on whether 'status' is provided
+    // builds the query based on whether the 'status' is provided
     let query = "SELECT * FROM Tasks";
     let queryParams = [];
 
     if (status) {
       query += " WHERE Status = ?";
-      queryParams.push(status);  // Add status to the query parameters
+      queryParams.push(status); 
     }
+    // runs the query with dynamic parameters
+    const [tasks] = await db.query(query, queryParams);
 
-    const [tasks] = await db.query(query, queryParams);  // Run the query with dynamic parameters
+    // returns tasks as a JSON response
+    res.json(tasks);
 
-    console.log("📥 Loaded tasks from DB:", tasks);  // ✅ Log tasks returned
-
-    res.json(tasks);  // Return tasks as JSON response
+    // error handling
   } catch (err) {
     console.error("Error fetching tasks:", err);
-    res.status(500).json({ error: err.message });  // Return error message if something goes wrong
+    res.status(500).json({ error: err.message });
   }
 });
 
 // create new task
 app.post("/tasks", async (req, res) => {
 
-  console.log("💬 Incoming data:", req.body); // NEW LOGGING LINE
-  console.log("👷 Worker_type received:", req.body.Worker_type); // ✅ Add this
-  
+  // initialises the vars
   const { account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time } = req.body;
 
-  //console.log("📝 Inserting into DB:", [
-  //  Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_Type, Task_Time, account_id
-  //]);
-
-  // Check if required info is provided from Wix
-  //if (!account_id) {
-  //  console.error("Error: account_id is missing");
-  //  return res.status(400).json({ error: "account_id is required" });
-  //}
-    
+  // inserts the inputted values into the tables column slots
   try {
     const [result] = await db.query(
       "INSERT INTO Tasks (account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [account_id, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time]
     );
 
-    console.log("✅ DB Insert Result:", result); // ✅ After insert
-
     // inserts the inputted data from Wix
     res.json({ id: result.insertId, Task_name, Field_ID, Required_Skills, Num_of_workers, Worker_type, Task_Time });
+
+    // error handling
   } catch (err) {
-    console.error("❌ DB Insert Error:", err.message);
+    console.error("Database Insert Error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Update task status by ID
+// updates the task status using the task ID
 app.patch("/tasks/:id", async (req, res) => {
   const { id } = req.params;
   const { Status } = req.body;
 
+  // uses the UPDATE query to update the task's status
   try {
     const [result] = await db.query("UPDATE Tasks SET Status = ? WHERE Task_ID = ?", [Status, id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Task not found" });
     }
     res.json({ message: "Task updated successfully" });
+
+    // error handling
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Clear all tasks from the Tasks table
+// DELETEs all tasks from the tasks table
 app.delete("/tasks", async (req, res) => {
   try {
     await db.query("DELETE FROM Tasks");
@@ -162,7 +155,7 @@ app.delete("/tasks", async (req, res) => {
   }
 });
 
-// create new worker
+// creates new worker
 // get tasks os specific field
 app.get("/fields/:id/tasks", async (req, res) => {
   const { id } = req.params;
