@@ -14,10 +14,11 @@ const pool = mysql.createPool({
 });
 
 // Test MySQL connection to ensure the values are correct
-pool.getConnection()
-  .then(conn => {
+// Use the promise-based pool to check connection
+pool.promise()
+  .query("SELECT 1")
+  .then(([rows, fields]) => {
     console.log("✅ MySQL connected");
-    conn.release();
   })
   .catch(err => {
     console.error("❌ MySQL connection error:", err.message);
