@@ -133,11 +133,12 @@ app.post("/assign-task", async (req, res) => {
 
 // login
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body;  // Use email instead of username
+  const { email, password } = req.body;
+  console.log("🛂 Login attempt with email:", email);
 
   try {
-    // Update the query to search for the email field in the database
     const [rows] = await db.query("SELECT * FROM accounts WHERE email = ?", [email]);
+    console.log("🔍 Query result:", rows);
 
     if (rows.length === 0) {
       return res.status(401).json({ success: false, message: "This email doesn't match any account. Try again." });
@@ -145,15 +146,17 @@ app.post("/login", async (req, res) => {
 
     const user = rows[0];
 
-    if (password !== user.password) {
+    if (password !== user.password_hash) {
       return res.status(401).json({ success: false, message: "Invalid password" });
     }
 
     res.json({ success: true, account_id: user.account_id, account_type: user.account_type });
   } catch (err) {
+    console.error("❌ DB error during login:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // Clear the Tasks table on every server restart
 async function clearTasksTable() {
