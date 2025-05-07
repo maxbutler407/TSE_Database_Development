@@ -146,9 +146,9 @@ app.post("/login", async (req, res) => {
 
     const user = rows[0];
 
-    if (password !== user.password_hash) {
-      return res.status(401).json({ success: false, message: "Invalid password" });
-    }
+  if (password !== user.password_hash) {
+    return res.status(401).json({ success: false, message: "Invalid password" });
+  }
 
     res.json({ success: true, account_id: user.account_id, account_type: user.account_type });
   } catch (err) {
