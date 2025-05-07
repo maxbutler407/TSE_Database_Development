@@ -56,7 +56,7 @@ app.delete("/fields/:id", async (req, res) => {
   }
 
   try {
-    const [result] = await db.query("DELETE FROM Fields WHERE id = ?", [numericId]);
+    const [result] = await db.query("DELETE FROM Fields WHERE Field_ID = ?", [numericId]);
     console.log("🧪 Deletion result:", result);
 
     if (result.affectedRows === 0) {
