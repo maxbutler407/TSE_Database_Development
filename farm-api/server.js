@@ -62,15 +62,28 @@ app.delete("/fields/:id", async (req, res) => {
 });
 
 
-// get all tasks
+// Get all tasks with optional filtering by status
 app.get("/tasks", async (req, res) => {
-  
+  const { status } = req.query;  // Extracting 'status' from query params, if available
+
   try {
-    const [tasks] = await db.query("SELECT * FROM Tasks");
-    console.log("📥 Loaded tasks from DB:", tasks); // ✅ Log tasks returned
-    res.json(tasks);
+    // Build the query conditionally based on whether 'status' is provided
+    let query = "SELECT * FROM Tasks";
+    let queryParams = [];
+
+    if (status) {
+      query += " WHERE Status = ?";
+      queryParams.push(status);  // Add status to the query parameters
+    }
+
+    const [tasks] = await db.query(query, queryParams);  // Run the query with dynamic parameters
+
+    console.log("📥 Loaded tasks from DB:", tasks);  // ✅ Log tasks returned
+
+    res.json(tasks);  // Return tasks as JSON response
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error fetching tasks:", err);
+    res.status(500).json({ error: err.message });  // Return error message if something goes wrong
   }
 });
 
