@@ -25,6 +25,32 @@ app.get("/fields", async (req, res) => {
   }
 });
 
+// GET /fields/:id - Get a specific field by its ID
+app.get("/fields/:id", async (req, res) => {
+  const { id } = req.params;
+  const numericId = Number(id);
+
+  if (isNaN(numericId)) {
+    return res.status(400).json({ error: "Invalid field ID" });
+  }
+
+  try {
+    // Query to get the field details by Field_ID
+    const [field] = await db.query("SELECT * FROM Fields WHERE Field_ID = ?", [numericId]);
+
+    if (field.length === 0) {
+      return res.status(404).json({ error: `Field ID ${numericId} not found` });
+    }
+
+    // Return the field data as JSON
+    res.json(field[0]); // Return the first record from the result array
+  } catch (err) {
+    console.error("❌ Error fetching field:", err.message);
+    res.status(500).json({ error: "Failed to fetch field data" });
+  }
+});
+
+
 // POST /fields to create a new field
 app.post("/fields", async (req, res) => {
   const { name, crop_type, account_id } = req.body;  // Use 'name' instead of 'field_name'
