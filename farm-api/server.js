@@ -47,23 +47,30 @@ app.post("/fields", async (req, res) => {
   }
 });
 
-// DELETE /fields/:id to delete a field from Railway database
 app.delete("/fields/:id", async (req, res) => {
   const { id } = req.params;
+  const numericId = Number(id);
+
+  if (isNaN(numericId)) {
+    return res.status(400).json({ error: "Invalid field ID" });
+  }
 
   try {
-    const [result] = await db.query("DELETE FROM Fields WHERE id = ?", [id]);
+    const [result] = await db.query("DELETE FROM Fields WHERE id = ?", [numericId]);
+    console.log("🧪 Deletion result:", result);
+
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Field not found in Railway database" });
+      return res.status(404).json({ error: `Field ID ${numericId} not found in Railway database` });
     }
 
-    console.log(`✅ Field ID ${id} deleted from Railway DB`);
-    res.json({ message: "Field deleted from Railway database" });
+    console.log(`✅ Field ID ${numericId} deleted from Railway DB`);
+    res.json({ message: `Field ID ${numericId} deleted successfully` });
   } catch (err) {
     console.error("❌ Error deleting field from Railway DB:", err.message);
     res.status(500).json({ error: "Failed to delete field from Railway DB" });
   }
 });
+
 
 
 
