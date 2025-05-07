@@ -121,6 +121,23 @@ app.post("/tasks", async (req, res) => {
   }
 });
 
+// Update task status by ID
+app.patch("/tasks/:id", async (req, res) => {
+  const { id } = req.params;
+  const { Status } = req.body;
+
+  try {
+    const [result] = await db.query("UPDATE Tasks SET Status = ? WHERE Task_ID = ?", [Status, id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    res.json({ message: "Task updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // create new worker
 // get tasks os specific field
 app.get("/fields/:id/tasks", async (req, res) => {
