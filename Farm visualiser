@@ -1,0 +1,222 @@
+import wixData from 'wix-data';
+
+let accountId = "1"; // Replace with the actual account ID. This is used to identify the user's account for data-related operations.
+
+// Function to save field data to an external API (Railway)
+async function saveToExternalAPI(fieldData) {
+    try {
+        // Sending a POST request to the external API to save the field data.
+        const response = await fetch('https://api-production-1560.up.railway.app/fields/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(fieldData) // Body contains the field data to be saved.
+        });
+
+        const responseBody = await response.text(); // Read the response body as text.
+        if (!response.ok) throw new Error(`API error ${response.status}`); // If the response is not successful, throw an error.
+        
+        const savedField = JSON.parse(responseBody); // Parse the response body into JSON.
+        return savedField?.id ? savedField : null; // Return the saved field if an ID exists.
+    } catch (err) {
+        console.error("❌ Error saving to API:", err); // Log any errors encountered during the process.
+        return null; // Return null if an error occurs.
+    }
+}
+
+// Function to delete a field from the Railway database
+async function deleteFromRailway(fieldId) {
+    try {
+        // Sending a DELETE request to the external API to remove the field by ID.
+        const response = await fetch(`https://api-production-1560.up.railway.app/fields/${fieldId}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const body = await response.text(); // Read the response body to include in the error message.
+            throw new Error(`Failed to delete. Status: ${response.status}. Body: ${body}`);
+        }
+
+        console.log(`✅ Deleted field ${fieldId} from Railway`); // Log success message.
+    } catch (err) {
+        console.error("❌ Failed to delete from Railway:", err); // Log any errors encountered during the process.
+    }
+}
+
+// Function to delete a field from the Wix database
+async function deleteFromWix(fieldId) {
+    try {
+        // Query Wix database to find the field record by FieldID.
+        const result = await wixData.query("Coordinates")
+            .eq("FieldID", fieldId.toString()) // Compare FieldID as a string.
+            .find();
+
+        if (result.items.length === 0) {
+            console.warn(`⚠️ No Wix records found for FieldID ${fieldId}`); // Warn if no records are found.
+            return;
+        }
+
+        // Remove the field from the Wix database.
+        await Promise.all(result.items.map(item =>
+            wixData.remove("Coordinates", item._id) // Remove each record by its unique _id.
+        ));
+
+        console.log(`✅ Deleted field ${fieldId} from Wix database`); // Log success message.
+    } catch (err) {
+        console.error("❌ Failed to delete from Wix DB:", err); // Log any errors encountered during the process.
+    }
+}
+
+// Code to execute when the page is ready
+$w.onReady(function () {
+    console.log("Using accountId: ", accountId); // Log the current account ID.
+    loadFieldsIntoMap(accountId); // Load the existing fields for the account into the map.
+
+    // Set up the event listener for the "Add Field" button.
+    $w("#btnAddField").onClick(() => {
+        const isDrawing = $w("#btnAddField").label === "Cancel Drawing"; // Check if drawing is in progress.
+        $w("#btnAddField").label = isDrawing ? "Draw New Field" : "Cancel Drawing"; // Toggle the button label.
+        $w("#htmlViewMap").postMessage(JSON.stringify({ action: isDrawing ? "cancelDrawing" : "enableDrawing" })); // Send message to map to either cancel or enable drawing.
+    });
+
+    // Set up the event listener for the "Save Location" button.
+    $w("#btnSaveLocation").onClick(() => {
+        const cropType = $w("#cropTypeInput").value.trim(); // Get the crop type input.
+        const fieldName = $w("#fieldNameInput").value.trim(); // Get the field name input.
+
+        let errorMsg = ""; // Initialize error message variable.
+        if (!fieldName) errorMsg += "Please enter a field name.\n"; // Check if the field name is empty.
+        if (!cropType) errorMsg += "Please select a crop type.\n"; // Check if the crop type is empty.
+
+        if (errorMsg) {
+            $w("#feedbackText").text = errorMsg.trim(); // Display error messages in feedback.
+            $w("#feedbackText").style.color = "#d32f2f"; // Set the error color.
+            $w("#feedbackText").show(); // Show the feedback message.
+            setTimeout(() => $w("#feedbackText").hide(), 5000); // Hide feedback after 5 seconds.
+            return; // Stop execution if there's an error.
+        }
+
+        // Request the coordinates of the drawn field from the map.
+        $w("#htmlViewMap").postMessage(JSON.stringify({ action: "getCoordinates" }));
+    });
+
+    // Set up the listener for messages coming from the HTML view (map).
+    $w("#htmlViewMap").onMessage(async (event) => {
+        let received;
+        try {
+            received = JSON.parse(event.data); // Parse the received data from the map.
+        } catch (e) {
+            console.error("❌ Invalid polygon data:", e); // Handle invalid data format.
+            return;
+        }
+
+        // If the action is "coordinates", process the coordinates data.
+        if (received.action === "coordinates") {
+            const validCoordinates = (received.data || []).filter(coordSet => coordSet.length > 0); // Filter out empty coordinate sets.
+            const cropType = $w("#cropTypeInput").value.trim(); // Get crop type.
+            const fieldName = $w("#fieldNameInput").value.trim(); // Get field name.
+
+            let errorMsg = ""; // Initialize error message variable.
+            if (!fieldName) errorMsg += "Please enter a field name.\n"; // Check if the field name is empty.
+            if (!cropType) errorMsg += "Please select a crop type.\n"; // Check if the crop type is empty.
+            if (validCoordinates.length === 0) errorMsg += "Please draw an area on the map.\n"; // Check if the coordinates are valid.
+
+            if (errorMsg) {
+                $w("#feedbackText").text = errorMsg.trim(); // Display error message.
+                $w("#feedbackText").style.color = "#d32f2f"; // Set error color.
+                $w("#feedbackText").show(); // Show the error feedback.
+                setTimeout(() => $w("#feedbackText").hide(), 5000); // Hide the feedback after 5 seconds.
+                return; // Stop execution if there's an error.
+            }
+
+            // Prepare the field data to be sent to the external API.
+            const fieldPayload = {
+                name: fieldName,
+                crop_type: cropType,
+                account_id: Number(accountId)
+            };
+
+            // Save the field data to the external API.
+            const savedField = await saveToExternalAPI(fieldPayload);
+            if (!savedField) {
+                $w("#feedbackText").text = "❌ Failed to save field to server."; // Show error message if saving failed.
+                $w("#feedbackText").style.color = "#d32f2f";
+                $w("#feedbackText").show();
+                setTimeout(() => $w("#feedbackText").hide(), 4000);
+                return; // Stop execution if the field was not saved.
+            }
+
+            // Prepare the data for saving in Wix DB.
+            const wixRecord = {
+                FieldID: savedField.id.toString(),
+                AccountID: accountId.toString(),
+                Coordinates: JSON.stringify(validCoordinates)
+            };
+
+            // Save the field data to the Wix database.
+            wixData.insert("Coordinates", wixRecord)
+                .then(() => {
+                    console.log("✅ Location saved to Wix DB:", wixRecord); // Log success.
+                    $w("#feedbackText").text = "✅ Field saved successfully!"; // Show success message.
+                    $w("#feedbackText").style.color = "#388e3c";
+                    $w("#feedbackText").show();
+                    setTimeout(() => $w("#feedbackText").hide(), 3000); // Hide success feedback after 3 seconds.
+
+                    // Reset drawing and refresh the map.
+                    $w("#htmlViewMap").postMessage(JSON.stringify({ action: "cancelDrawing" }));
+                    loadFieldsIntoMap(accountId);
+
+                    // Reset the button label to default.
+                    $w("#btnAddField").label = "Draw New Field";
+                })
+                .catch(err => {
+                    console.error("❌ Wix DB save failed:", err); // Log any errors from Wix DB.
+                    $w("#feedbackText").text = "❌ Failed to save to database."; // Show error message.
+                    $w("#feedbackText").style.color = "#d32f2f";
+                    $w("#feedbackText").show();
+                    setTimeout(() => $w("#feedbackText").hide(), 4000);
+                });
+        }
+    });
+
+    // Set up the event listener for the "Delete Field" button.
+    $w("#btnDeleteField").onClick(async () => {
+        const fieldId = $w("#deleteFieldIdInput").value.trim(); // Get the field ID to delete.
+        if (!fieldId) {
+            $w("#feedbackText").text = "Please enter a field ID to delete."; // Show error if field ID is empty.
+            $w("#feedbackText").style.color = "#d32f2f";
+            $w("#feedbackText").show();
+            setTimeout(() => $w("#feedbackText").hide(), 4000);
+            return;
+        }
+
+        // Delete the field from both Railway and Wix databases.
+        await deleteFromRailway(fieldId);
+        await deleteFromWix(fieldId);
+
+        // Clear the fields from the map and reload the updated fields.
+        $w("#htmlViewMap").postMessage(JSON.stringify({ action: "clearFields" }));
+        loadFieldsIntoMap(accountId);
+    });
+});
+
+// Function to load fields into the map from Wix DB
+function loadFieldsIntoMap(accountId) {
+    wixData.query("Coordinates")
+        .eq("AccountID", accountId)
+        .find()
+        .then(results => {
+            const dataToSend = results.items.map(item => ({
+                FieldID: item.FieldID,
+                AccountID: item.AccountID,
+                Coordinates: item.Coordinates,
+                polygonCoordinates: JSON.parse(item.Coordinates) // Parse the coordinates string into an array.
+            }));
+
+            console.log("✅ Fields loaded into map:", dataToSend);
+
+            // Clear existing fields on the map and load the new data.
+            $w("#htmlViewMap").postMessage(JSON.stringify({ action: "clearFields" }));
+            $w("#htmlViewMap").postMessage(JSON.stringify({ action: "refresh", data: dataToSend }));
+        })
+        .catch(err => console.error("❌ Failed to load fields:", err)); // Log any errors when loading the fields.
+}
