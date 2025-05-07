@@ -205,7 +205,7 @@ app.post("/login", async (req, res) => {
 });
 
 
-// Clear the Tasks table on every server restart
+// logic for clearing the tasks table on every server restart
 async function clearTasksTable() {
   try {
     await db.query("DELETE FROM Tasks");
@@ -217,7 +217,7 @@ async function clearTasksTable() {
 }
 
 // clears the data in the tasks table every time we commit changes
-clearTasksTable();
+//clearTasksTable();
 
 // start server
 app.listen(3000, () => {
