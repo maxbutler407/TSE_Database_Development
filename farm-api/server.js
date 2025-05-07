@@ -47,19 +47,24 @@ app.post("/fields", async (req, res) => {
   }
 });
 
-// DELETE /fields/:id to delete a field by its ID
+// DELETE /fields/:id to delete a field from Railway database
 app.delete("/fields/:id", async (req, res) => {
   const { id } = req.params;
+
   try {
     const [result] = await db.query("DELETE FROM Fields WHERE id = ?", [id]);
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Field not found" });
+      return res.status(404).json({ error: "Field not found in Railway database" });
     }
-    res.json({ message: "Field deleted successfully" });
+
+    console.log(`✅ Field ID ${id} deleted from Railway DB`);
+    res.json({ message: "Field deleted from Railway database" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("❌ Error deleting field from Railway DB:", err.message);
+    res.status(500).json({ error: "Failed to delete field from Railway DB" });
   }
 });
+
 
 
 // Get all tasks with optional filtering by status
