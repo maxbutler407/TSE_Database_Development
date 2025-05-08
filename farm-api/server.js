@@ -206,23 +206,24 @@ app.post("/assign-task", async (req, res) => {
 
 // login
 app.post("/login", async (req, res) => {
+  // Extract email and password from the request body
   const { email, password } = req.body;
-  console.log("🛂 Login attempt with email:", email);
+  console.log("🛂 Login attempt with email:", email); // Log the login attempt
 
   try {
+    // Query the database for a user with the matching email
     const [rows] = await db.query("SELECT * FROM accounts WHERE email = ?", [email]);
-    console.log("🔍 Query result:", rows);
-
+    console.log("🔍 Query result:", rows); // Log the result of the query
+     // If no user is found with that email, return an error response
     if (rows.length === 0) {
       return res.status(401).json({ success: false, message: "This email doesn't match any account. Try again." });
     }
-
+    // Get the first (and only) matching user from the result
     const user = rows[0];
-
+    // Compare the entered password to the one stored in the database
   if (password !== user.password_hash) {
     return res.status(401).json({ success: false, message: "Invalid password" });
   }
-
     res.json({ success: true, account_id: user.account_id, account_type: user.account_type });
   } catch (err) {
     console.error("❌ DB error during login:", err);
