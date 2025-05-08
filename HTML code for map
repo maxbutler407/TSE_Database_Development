@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Unified Map</title>
+  <style>
+    .info-menu {
+      position: absolute;
+      background-color: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      display: none;
+      min-width: 200px;
+    }
+
+    .info-menu h3 {
+      margin: 0;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .info-menu p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+  <script>
+    let map;
+    let drawingManager;
+    let drawnPolygons = [];
+    let currentPolygon = null; // Track the currently drawn polygon
+    let drawingInProgress = false;
+    let infoMenu = null;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 7,  // Zoom level adjusted to focus more closely on England
+        center: { lat: 51.5074, lng: -0.1278 }, // Coordinates for London, England
+      });
+
+      drawingManager = new google.maps.drawing.DrawingManager({
+        drawingControl: false,
+        drawingMode: null,
+        polygonOptions: {
+          fillColor: "#FF0000", // Red color for new fields
+          fillOpacity: 0.5,
+          strokeColor: "#FF0000", // Red color for new fields
+          strokeWeight: 2,
+          editable: true,
+          draggable: false,
+          clickable: true
+        }
+      });
+
+      drawingManager.setMap(map);
+
+      google.maps.event.addListener(drawingManager, "overlaycomplete", function (event) {
+        if (drawingInProgress) return;  // If drawing is in progress, prevent duplicate submissions
+        drawingInProgress = true;
+
+        clearNewDrawings(); // Clear any previous polygon before drawing a new one
+
+        currentPolygon = event.overlay; // Set the current polygon being drawn
+        drawnPolygons.push(currentPolygon); // Store the current polygon
+
+        drawingManager.setDrawingMode(null); // Exit drawing mode
+        drawingInProgress = false;
+      });
+
+      infoMenu = document.createElement('div');
+      infoMenu.classList.add('info-menu');
+      document.body.appendChild(infoMenu);
+
+      window.addEventListener("message", function (event) {
+        let message;
+        try {
+          message = JSON.parse(event.data);
+        } catch (e) {
+          console.error("❌ Invalid message received:", e);
+          return;
+        }
+
+        if (message.action === "clearFields") {
+          clearMap();
+        }
+
+        if (message.action === "refresh" && Array.isArray(message.data)) {
+          clearMap();
+          drawSavedPolygons(message.data);
+        }
+
+        if (message.action === "enableDrawing") {
+          drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+        }
+
+        if (message.action === "cancelDrawing") {
+          drawingManager.setDrawingMode(null);
+          clearNewDrawings();
+        }
+
+        if (message.action === "getCoordinates") {
+          if (!currentPolygon) {
+            window.parent.postMessage(JSON.stringify({
+              action: "coordinates",
+              data: []
+            }), "*");
+            return;
+          }
+
+          // Only send the current polygon coordinates
+          const coordinates = currentPolygon.getPath().getArray().map(coord => ({
+            lat: coord.lat(),
+            lng: coord.lng()
+          }));
+
+          window.parent.postMessage(JSON.stringify({
+            action: "coordinates",
+            data: [coordinates]
+          }), "*");
+        }
+      });
+
+      google.maps.event.addListener(map, "click", function () {
+        infoMenu.style.display = 'none';
+      });
+    }
+
+    function clearMap() {
+      console.log("🔴 Clearing all polygons from the map...");
+      drawnPolygons.forEach(polygon => polygon.setMap(null));
+      drawnPolygons = [];
+    }
+
+    function drawSavedPolygons(fields) {
+      fields.forEach(field => {
+        const polygon = new google.maps.Polygon({
+          paths: field.polygonCoordinates,
+          map: map,
+          strokeColor: "#0000FF", // Blue color for saved fields
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: "#0000FF", // Blue color for saved fields
+          fillOpacity: 0.35,
+          clickable: true
+        });
+
+        google.maps.event.addListener(polygon, "click", function (event) {
+          showFieldInfo(event, field.FieldID);
+        });
+
+        drawnPolygons.push(polygon);
+      });
+    }
+
+    function clearNewDrawings() {
+      if (currentPolygon) {
+        currentPolygon.setMap(null);
+        drawnPolygons = [];
+        currentPolygon = null;
+      }
+    }
+
+    function showFieldInfo(event, fieldId) {
+      fetch(`https://api-production-1560.up.railway.app/fields/${fieldId}`)
+        .then(response => response.json())
+        .then(fieldData => {
+          infoMenu.innerHTML = `
+            <h3>Field Information</h3>
+            <p><strong>Field Name:</strong> ${fieldData.name}</p>
+            <p><strong>Crop Type:</strong> ${fieldData.crop_type}</p>
+            <p><strong>Field ID:</strong> ${fieldData.Field_ID}</p>
+          `;
+
+          const projection = map.getProjection();
+          const point = projection.fromLatLngToPoint(event.latLng);
+          infoMenu.style.left = `${point.x + 10}px`;
+          infoMenu.style.top = `${point.y - 50}px`;
+          infoMenu.style.display = 'block';
+        })
+        .catch(error => {
+          console.error("Error fetching field data:", error);
+        });
+    }
+  </script>
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCX0gl825HzUwYxOcz71qvHjOUBAkThKw8&libraries=drawing&callback=initMap">
+  </script>
+</head>
+<body>
+  <div id="map" style="width: 100%; height: 100vh;"></div>
+</body>
+</html>
+
